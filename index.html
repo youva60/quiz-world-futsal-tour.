@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Quiz World Futsal Tour</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;600;700&display=swap">
+<style>
+/* Plateau TV de quiz : une scène bleu nuit, une seule couleur forte (l'or), questions en cartouches biseautées */
+:root{
+  --night:#0a0f2e;
+  --stage:#131b4d;
+  --stage-2:#1c2766;
+  --line:#3a4aa8;
+  --ink:#eef1ff;
+  --muted:#a3acdf;
+  --gold:#f5c843;
+  --gold-ink:#241a00;
+  --good:#2fbf71;
+  --bad:#e5484d;
+  --display:"Bricolage Grotesque","Arial Black",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+html,body{min-height:100%}
+body{
+  background:radial-gradient(120% 70% at 50% -10%,#24318a 0%,var(--night) 60%) var(--night);
+  background-attachment:fixed;
+  color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+}
+.wrap{max-width:640px;margin:0 auto;padding-block:20px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:20px}
+h1,h2{font-family:var(--display);font-weight:800;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+/* Accueil */
+.hero{display:flex;flex-direction:column;gap:10px;padding-top:8px}
+.hero h1{font-size:clamp(34px,9vw,52px);line-height:1}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--muted);max-width:52ch}
+.flags{display:flex;gap:6px;font-size:26px;flex-wrap:wrap}
+.panel{background:var(--stage);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel h2{font-size:18px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.chip{background:var(--stage-2);border:1.5px solid var(--line);border-radius:999px;padding:10px 12px;text-align:left;display:flex;gap:8px;align-items:center;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.rules{display:grid;gap:6px;color:var(--muted);font-size:15px;padding-left:18px;margin:0}
+.cta{background:var(--gold);color:var(--gold-ink);border:0;border-radius:12px;padding:16px;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:.01em}
+.cta:active{transform:translateY(1px)}
+.ghost{background:transparent;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-weight:700;color:var(--muted)}
+
+/* Jeu */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.score{font-family:var(--display);font-weight:800;font-size:22px;color:var(--gold);font-variant-numeric:tabular-nums}
+.score small{font-family:var(--body);font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.1em;text-transform:uppercase;display:block}
+.qnum{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;text-align:right}
+.ladder{display:grid;grid-template-columns:repeat(20,1fr);gap:3px}
+.ladder i{height:8px;border-radius:2px;background:var(--stage-2)}
+.ladder i.ok{background:var(--good)}
+.ladder i.ko{background:var(--bad)}
+.ladder i.now{background:var(--gold)}
+.meta{display:flex;gap:8px;flex-wrap:wrap}
+.tag{background:var(--stage-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:700}
+.value{color:var(--gold)}
+.question{
+  background:linear-gradient(180deg,var(--stage-2),var(--stage));
+  border:1.5px solid var(--gold);
+  clip-path:polygon(18px 0,calc(100% - 18px) 0,100% 50%,calc(100% - 18px) 100%,18px 100%,0 50%);
+  padding:22px 32px;min-height:110px;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:var(--display);font-weight:600;font-size:clamp(19px,5vw,24px);line-height:1.25;text-wrap:balance}
+.answers{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:560px){.answers{grid-template-columns:1fr 1fr}}
+.ans{
+  background:var(--stage);border:1.5px solid var(--line);
+  clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,14px 100%,0 50%);
+  padding:14px 26px;text-align:left;display:flex;gap:10px;align-items:center;min-height:56px;font-weight:600;font-size:17px;
+  transition:background .2s,border-color .2s,opacity .2s}
+.ans b{color:var(--gold);font-family:var(--display);font-weight:800}
+.ans:hover:not(:disabled){border-color:var(--gold)}
+.ans:disabled{cursor:default}
+.ans.picked{background:#7a5a00;border-color:var(--gold)}
+.ans.right{background:var(--good);border-color:var(--good);color:#04210f}
+.ans.right b,.ans.wrong b{color:inherit}
+.ans.wrong{background:var(--bad);border-color:var(--bad);color:#fff}
+.ans.gone{opacity:.15}
+.tools{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.joker{background:var(--stage-2);border:1.5px solid var(--gold);color:var(--gold);border-radius:999px;padding:8px 16px;font-weight:800;font-family:var(--display)}
+.joker:disabled{opacity:.3;cursor:default}
+.feedback{min-height:24px;font-weight:700;text-align:center}
+.feedback.ok{color:var(--good)}
+.feedback.ko{color:#ff8a8d}
+
+/* Fin */
+.final{text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}
+.big{font-family:var(--display);font-weight:800;font-size:clamp(48px,14vw,76px);color:var(--gold);line-height:1;font-variant-numeric:tabular-nums}
+.verdict{font-size:18px;font-weight:700}
+.missed{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.missed li{background:var(--stage-2);border-radius:10px;padding:10px 12px;font-size:15px}
+.missed li strong{color:var(--good)}
+.missed li span{color:var(--muted);font-size:13px;display:block}
+.foot{color:var(--muted);font-size:13px;text-align:center}
+.field{background:var(--night);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;font-size:17px;width:100%;box-sizing:border-box}
+.field:focus{outline:none;border-color:var(--gold)}
+.field.need{border-color:var(--bad)}
+.hint{color:var(--muted);font-size:14px}
+.progress{background:var(--stage);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-weight:600;max-width:46ch}
+.pname{font-family:var(--display);font-weight:800;font-size:24px}
+.sharetext{background:var(--night);border:1px dashed var(--line);border-radius:10px;padding:12px;margin:0;white-space:pre-wrap;font-family:var(--body);font-size:15px;user-select:all}
+.board{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;counter-reset:r}
+.board li{counter-increment:r;display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--stage-2);border-radius:10px;padding:10px 12px;font-variant-numeric:tabular-nums}
+.board li::before{content:counter(r);font-family:var(--display);font-weight:800;color:var(--muted)}
+.board li:first-child::before{content:"🏆"}
+.board li.me{outline:2px solid var(--gold)}
+.board b{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board span{color:var(--gold);font-weight:700}
+.board small{display:block;color:var(--muted);font-size:12px;font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<main class="wrap">
+  <!-- ACCUEIL -->
+  <section id="start" class="wrap" style="padding:0">
+    <div class="hero">
+      <p class="eyebrow">Centre Ados de Bresles · Inter-centres du 22 octobre</p>
+      <h1>Qui veut gagner le <span>World Futsal Tour</span> ?</h1>
+      <p>Révisez en famille la géographie, la culture et le sport des 6 pays en lice. Chaque partie tire 20 questions au hasard parmi 120.</p>
+      <div class="flags" aria-hidden="true">🇧🇷 🇯🇵 🇪🇸 🇸🇳 🇨🇦 🇮🇹</div>
+    </div>
+
+    <div class="panel">
+      <h2>Sur quel pays réviser ?</h2>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Qui joue ?</h2>
+      <input id="player" class="field" type="text" maxlength="20" autocomplete="off" placeholder="Prénom ou pseudo (ex. Inès, Papa, Team Kenzo)">
+      <p class="hint">Le prénom seul suffit, sans nom de famille.</p>
+    </div>
+
+    <button class="cta" id="go">Lancer la partie</button>
+
+    <div class="panel" id="webStart" hidden>
+      <h2>Classement du Centre Ados</h2>
+      <p class="hint">Le meilleur score de chaque joueur, toutes familles confondues.</p>
+      <ol class="board" id="webStartList"></ol>
+    </div>
+
+    <div class="panel" id="boardStart" hidden>
+      <h2>Classement de la famille</h2>
+      <p class="hint">Les parties jouées sur ce téléphone.</p>
+      <ol class="board" id="boardStartList"></ol>
+    </div>
+
+    <div class="panel">
+      <h2>Règles du jeu</h2>
+      <ul class="rules">
+        <li>20 questions, 4 réponses possibles, une seule est juste.</li>
+        <li>Chaque bonne réponse rapporte 100 points.</li>
+        <li>Bonus série : +50 à partir de 3 bonnes réponses d'affilée, +100 à partir de 5.</li>
+        <li>Une mauvaise réponse ne vous élimine pas : la bonne s'affiche pour apprendre.</li>
+        <li>Un joker 50:50 par partie retire deux mauvaises réponses, mais la question ne rapporte alors que 50 points.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- JEU -->
+  <section id="game" class="wrap" style="padding:0" hidden>
+    <div class="topbar">
+      <div class="score"><small>Points</small><span id="pts">0</span></div>
+      <div class="qnum"><span id="qn">1</span> / 20</div>
+    </div>
+    <div class="ladder" id="ladder" aria-hidden="true"></div>
+    <div class="meta">
+      <span class="tag" id="ctry"></span>
+      <span class="tag" id="cat"></span>
+      <span class="tag value" id="val"></span>
+    </div>
+    <div class="question" id="q"></div>
+    <div class="answers" id="answers"></div>
+    <p class="feedback" id="fb" aria-live="polite"></p>
+    <div class="tools">
+      <button class="joker" id="j50">50:50</button>
+      <button class="cta" id="next" hidden style="flex:1;min-width:180px">Question suivante</button>
+    </div>
+    <button class="ghost" id="quit">Abandonner et revenir à l'accueil</button>
+  </section>
+
+  <!-- FIN -->
+  <section id="end" class="wrap" style="padding:0" hidden>
+    <div class="final">
+      <p class="eyebrow">Fin de la partie</p>
+      <p class="pname" id="endName"></p>
+      <div class="big" id="endPts">0</div>
+      <p class="verdict" id="verdict"></p>
+      <p style="color:var(--muted)" id="endRight"></p>
+      <p class="progress" id="progress"></p>
+    </div>
+    <div class="panel share">
+      <h2>Défiez les autres familles</h2>
+      <p class="hint">Copiez votre score et collez-le dans le groupe WhatsApp du Centre Ados.</p>
+      <pre class="sharetext" id="shareText"></pre>
+      <button class="cta" id="copy">Copier mon score</button>
+      <p class="hint" id="copyMsg" aria-live="polite"></p>
+    </div>
+    <button class="cta" id="again">Nouvelle partie (20 autres questions)</button>
+    <button class="ghost" id="home">Changer de joueur ou de pays</button>
+    <div class="panel" id="webEnd" hidden>
+      <h2>Classement du Centre Ados</h2>
+      <ol class="board" id="webEndList"></ol>
+    </div>
+    <div class="panel" id="boardEnd" hidden>
+      <h2>Classement de la famille</h2>
+      <ol class="board" id="boardEndList"></ol>
+    </div>
+    <div class="panel" id="missedBox">
+      <h2>À revoir avant demain</h2>
+      <ul class="missed" id="missed"></ul>
+    </div>
+  </section>
+
+  <p class="foot">Centre Ados · Service Jeunesse · Ville de Bresles</p>
+</main>
+
+<script>
+const C={BR:{n:"Brésil",f:"🇧🇷"},JP:{n:"Japon",f:"🇯🇵"},ES:{n:"Espagne",f:"🇪🇸"},SN:{n:"Sénégal",f:"🇸🇳"},CA:{n:"Canada",f:"🇨🇦"},IT:{n:"Italie",f:"🇮🇹"}};
+const CAT={geo:"Géographie",cul:"Culture",spo:"Sport"};
+const N=20; // 100 pts par bonne réponse (50 avec le joker) + bonus série : +50 dès 3 d'affilée, +100 dès 5
+// [pays, catégorie, question, bonne réponse, 3 mauvaises]
+const Q=[
+["BR","geo","Quelle est la capitale du Brésil ?","Brasília","Rio de Janeiro","São Paulo","Salvador"],
+["BR","cul","Quelle langue parle-t-on au Brésil ?","Le portugais","L'espagnol","Le brésilien","L'anglais"],
+["BR","cul","Quelle est la monnaie du Brésil ?","Le real","Le peso","Le dollar brésilien","Le cruzeiro"],
+["BR","geo","Quel grand fleuve traverse la forêt amazonienne ?","L'Amazone","Le Nil","Le Mississippi","Le Danube"],
+["BR","spo","Combien de Coupes du monde de football le Brésil avait-il gagnées avant 2026 ?","5","3","4","6"],
+["BR","cul","Quelle statue géante domine la ville de Rio de Janeiro ?","Le Christ Rédempteur","La statue de la Liberté","Le Sphinx","Le Bouddha de Rio"],
+["BR","cul","Quelle grande fête de Rio est célèbre dans le monde entier ?","Le Carnaval","La Tomatina","Halloween","La fête des Lumières"],
+["BR","cul","Quelle danse et musique est née au Brésil ?","La samba","Le flamenco","Le tango","La salsa"],
+["BR","spo","Quel footballeur brésilien était surnommé « le Roi » ?","Pelé","Neymar","Ronaldinho","Kaká"],
+["BR","spo","Quel art martial brésilien mélange danse, musique et combat ?","La capoeira","Le karaté","Le judo","Le taekwondo"],
+["BR","geo","Sur quel continent se trouve le Brésil ?","L'Amérique du Sud","L'Afrique","L'Amérique du Nord","L'Océanie"],
+["BR","geo","Quelle est la plus grande ville du Brésil ?","São Paulo","Brasília","Rio de Janeiro","Recife"],
+["BR","geo","Quelles chutes d'eau se trouvent à la frontière entre le Brésil et l'Argentine ?","Les chutes d'Iguaçu","Les chutes du Niagara","Les chutes Victoria","Les chutes du Rhin"],
+["BR","geo","Comment s'appelle la célèbre plage de Rio de Janeiro ?","Copacabana","Malibu","Waikiki","La Croisette"],
+["BR","spo","En quelle année Rio a-t-elle organisé les Jeux olympiques d'été ?","2016","2012","2008","2020"],
+["BR","spo","Quel pilote brésilien a été trois fois champion du monde de Formule 1 ?","Ayrton Senna","Alain Prost","Michael Schumacher","Lewis Hamilton"],
+["BR","cul","Le Brésil est le premier producteur mondial de…","Café","Thé","Chocolat","Riz"],
+["BR","cul","Quel plat à base de haricots noirs et de viande est typique du Brésil ?","La feijoada","La paella","Le couscous","La poutine"],
+["BR","cul","Quel pays a colonisé le Brésil ?","Le Portugal","L'Espagne","La France","L'Angleterre"],
+["BR","cul","Quelles sont les couleurs du drapeau brésilien ?","Vert, jaune, bleu et blanc","Rouge et blanc","Bleu, blanc, rouge","Vert, blanc et rouge"],
+
+["JP","geo","Quelle est la capitale du Japon ?","Tokyo","Kyoto","Osaka","Pékin"],
+["JP","cul","Quelle est la monnaie du Japon ?","Le yen","Le yuan","Le won","La roupie"],
+["JP","geo","Quel volcan est la plus haute montagne du Japon ?","Le mont Fuji","Le Kilimandjaro","L'Everest","Le Vésuve"],
+["JP","cul","À quoi ressemble le drapeau du Japon ?","Un cercle rouge sur fond blanc","Une étoile jaune sur fond rouge","Une croix blanche sur fond rouge","Un soleil jaune sur fond bleu"],
+["JP","cul","Quel est le surnom du Japon ?","Le pays du Soleil-Levant","Le pays du Matin calme","L'empire du Milieu","Le pays des mille lacs"],
+["JP","spo","Quel sport japonais oppose deux lutteurs très lourds dans un cercle ?","Le sumo","Le judo","Le kendo","Le karaté"],
+["JP","cul","Comment s'appelle le plat japonais à base de riz et de poisson cru ?","Les sushis","Les nems","Les tacos","Les raviolis"],
+["JP","cul","Comment s'appelle l'art japonais du pliage de papier ?","L'origami","Le manga","Le bonsaï","L'ikebana"],
+["JP","cul","Comment s'appelle le train à grande vitesse japonais ?","Le Shinkansen","Le TGV","L'Eurostar","L'Orient-Express"],
+["JP","geo","Le Japon est composé…","De milliers d'îles","D'une seule île","D'un désert et d'une île","D'une grande péninsule"],
+["JP","geo","Quel océan borde l'est du Japon ?","L'océan Pacifique","L'océan Atlantique","L'océan Indien","L'océan Arctique"],
+["JP","cul","Comment appelle-t-on les bandes dessinées japonaises ?","Les mangas","Les comics","Les fumetti","Les webtoons"],
+["JP","spo","Les JO de « Tokyo 2020 » ont été repoussés à cause du Covid. En quelle année ont-ils eu lieu ?","2021","2020","2022","2019"],
+["JP","spo","Quel art martial né au Japon signifie « la voie de la souplesse » ?","Le judo","Le karaté","Le sumo","L'aïkido"],
+["JP","cul","Quel arbre fleuri est fêté chaque printemps au Japon ?","Le cerisier","Le chêne","Le baobab","L'érable"],
+["JP","cul","Comment se salue-t-on traditionnellement au Japon ?","En s'inclinant","En se faisant la bise","En se serrant dans les bras","En se tapant dans la main"],
+["JP","cul","Comment s'appelle le vêtement traditionnel japonais ?","Le kimono","Le sari","Le boubou","Le poncho"],
+["JP","cul","Avec quoi mange-t-on traditionnellement au Japon ?","Des baguettes","Une fourchette","Les doigts uniquement","Une cuillère en bois"],
+["JP","spo","Quel est le surnom de l'équipe du Japon de football ?","Les Samouraïs bleus","Les Ninjas rouges","Les Dragons","Les Lions"],
+["JP","cul","Quelle entreprise japonaise a créé la console Switch ?","Nintendo","Microsoft","Apple","Samsung"],
+
+["ES","geo","Quelle est la capitale de l'Espagne ?","Madrid","Barcelone","Séville","Lisbonne"],
+["ES","cul","Quelle est la monnaie de l'Espagne ?","L'euro","La peseta","Le peso","Le franc"],
+["ES","cul","Quel plat de riz, originaire de Valence, est typique de l'Espagne ?","La paella","Le risotto","Le couscous","La feijoada"],
+["ES","cul","Quelle danse et musique vient d'Andalousie ?","Le flamenco","La samba","La tarentelle","Le tango"],
+["ES","cul","Quelle célèbre basilique, imaginée par Gaudí, se trouve à Barcelone ?","La Sagrada Família","Notre-Dame","Saint-Pierre","Le Sacré-Cœur"],
+["ES","geo","Quelle mer borde l'est de l'Espagne ?","La mer Méditerranée","La mer du Nord","La mer Noire","La mer Rouge"],
+["ES","geo","Quelles montagnes séparent l'Espagne de la France ?","Les Pyrénées","Les Alpes","Les Vosges","Le Jura"],
+["ES","spo","Quel club joue au stade Santiago-Bernabéu ?","Le Real Madrid","Le FC Barcelone","L'Atlético de Madrid","Le FC Séville"],
+["ES","spo","En quelle année l'Espagne a-t-elle gagné la Coupe du monde de football ?","2010","2006","2014","1998"],
+["ES","spo","Quel joueur de tennis espagnol a gagné 14 fois Roland-Garros ?","Rafael Nadal","Carlos Alcaraz","Novak Djokovic","Roger Federer"],
+["ES","geo","Quelles îles espagnoles se trouvent au large de l'Afrique ?","Les Canaries","Les Baléares","Les Açores","La Corse"],
+["ES","cul","Dans quelle fête espagnole se lance-t-on des tomates ?","La Tomatina","La Feria","Le Carnaval","La San Fermín"],
+["ES","cul","Quel peintre espagnol a peint « Guernica » ?","Pablo Picasso","Claude Monet","Vincent Van Gogh","Léonard de Vinci"],
+["ES","cul","Quel chevalier, héros de Cervantès, se bat contre des moulins à vent ?","Don Quichotte","Zorro","Robin des Bois","D'Artagnan"],
+["ES","geo","Dans quelle ville se trouve le palais de l'Alhambra ?","Grenade","Madrid","Valence","Bilbao"],
+["ES","cul","Que sont les « tapas » ?","De petites portions à partager","Un dessert au chocolat","Une danse","Des chaussures"],
+["ES","cul","Quelles sont les couleurs du drapeau espagnol ?","Rouge et jaune","Bleu et blanc","Vert, blanc et rouge","Rouge et blanc"],
+["ES","spo","Quel pays a gagné l'Euro 2024 de football ?","L'Espagne","L'Angleterre","La France","L'Italie"],
+["ES","cul","Quel autre nom donne-t-on à la langue espagnole ?","Le castillan","Le catalan","Le latin","Le basque"],
+["ES","geo","Quel pays est voisin de l'Espagne à l'ouest ?","Le Portugal","L'Italie","Le Maroc","La Suisse"],
+
+["SN","geo","Quelle est la capitale du Sénégal ?","Dakar","Saint-Louis","Bamako","Abidjan"],
+["SN","cul","Quelle est la langue officielle du Sénégal ?","Le français","L'anglais","Le portugais","L'arabe"],
+["SN","cul","Quelle langue nationale est la plus parlée au Sénégal ?","Le wolof","Le swahili","Le lingala","Le berbère"],
+["SN","cul","Quelle est la monnaie du Sénégal ?","Le franc CFA","L'euro","Le dinar","Le rand"],
+["SN","geo","Dans quelle région d'Afrique se trouve le Sénégal ?","L'Afrique de l'Ouest","L'Afrique de l'Est","L'Afrique du Nord","L'Afrique australe"],
+["SN","cul","Quelle île près de Dakar est un lieu de mémoire de la traite des esclaves ?","L'île de Gorée","L'île de Ré","Madagascar","L'île Maurice"],
+["SN","geo","Quel lac sénégalais est célèbre pour sa couleur ?","Le lac Rose","Le lac Bleu","Le lac Vert","Le lac Doré"],
+["SN","cul","Quel est le plat national du Sénégal, à base de riz et de poisson ?","Le thiéboudienne","Le couscous","Le mafé","La paella"],
+["SN","spo","Quel sport traditionnel remplit les stades au Sénégal ?","La lutte sénégalaise","Le sumo","Le rugby","Le cricket"],
+["SN","spo","En quelle année le Sénégal a-t-il remporté sa première Coupe d'Afrique des nations ?","2022","2002","2012","2019"],
+["SN","spo","Quel est le surnom de l'équipe du Sénégal de football ?","Les Lions de la Teranga","Les Éléphants","Les Super Eagles","Les Fennecs"],
+["SN","cul","Que veut dire le mot wolof « teranga » ?","L'hospitalité","La victoire","Le courage","La famille"],
+["SN","spo","Quel attaquant sénégalais a brillé à Liverpool ?","Sadio Mané","Didier Drogba","Mohamed Salah","Samuel Eto'o"],
+["SN","cul","Qui était le premier président du Sénégal, aussi grand poète ?","Léopold Sédar Senghor","Nelson Mandela","Abdoulaye Wade","Thomas Sankara"],
+["SN","geo","Quel fleuve forme la frontière nord du Sénégal ?","Le fleuve Sénégal","Le Niger","Le Congo","Le Nil"],
+["SN","geo","Quel arbre géant est un symbole du Sénégal ?","Le baobab","Le palmier","Le cocotier","Le séquoia"],
+["SN","cul","Quelles sont les couleurs du drapeau sénégalais ?","Vert, jaune, rouge avec une étoile verte","Rouge, blanc avec une feuille","Bleu, blanc, rouge","Noir, rouge et or"],
+["SN","spo","Quel célèbre rallye arrivait autrefois à Dakar ?","Le Paris-Dakar","Le Tour de France","Le Monte-Carlo","Le rallye du Maroc"],
+["SN","geo","Quel petit pays est presque entièrement entouré par le Sénégal ?","La Gambie","Le Mali","La Guinée","Le Togo"],
+["SN","spo","Quelle ville accueille les Jeux olympiques de la jeunesse fin 2026 ?","Dakar","Paris","Le Caire","Nairobi"],
+
+["CA","geo","Quelle est la capitale du Canada ?","Ottawa","Toronto","Montréal","Vancouver"],
+["CA","cul","Quelles sont les deux langues officielles du Canada ?","L'anglais et le français","L'anglais et l'espagnol","Le français et l'inuktitut","L'anglais et l'allemand"],
+["CA","cul","Quelle feuille figure sur le drapeau canadien ?","La feuille d'érable","La feuille de chêne","La feuille de palmier","La feuille de trèfle"],
+["CA","cul","Quel sirop sucré est la spécialité du Canada ?","Le sirop d'érable","Le sirop de menthe","Le sirop de grenadine","Le sirop d'agave"],
+["CA","spo","Quel sport sur glace est le plus populaire au Canada ?","Le hockey sur glace","Le curling","Le patinage artistique","Le bobsleigh"],
+["CA","geo","Quelle province du Canada parle surtout français ?","Le Québec","L'Ontario","L'Alberta","La Colombie-Britannique"],
+["CA","geo","Quelles célèbres chutes se trouvent entre le Canada et les États-Unis ?","Les chutes du Niagara","Les chutes Victoria","Les chutes d'Iguaçu","Les chutes Angel"],
+["CA","cul","Quelle est la monnaie du Canada ?","Le dollar canadien","L'euro","La livre","Le dollar américain"],
+["CA","cul","Comment appelle-t-on la police à cheval en tunique rouge du Canada ?","La Gendarmerie royale (GRC)","Le FBI","Scotland Yard","La Garde républicaine"],
+["CA","cul","Quel plat québécois mélange frites, fromage en grains et sauce ?","La poutine","Le fish and chips","La tartiflette","Le hot-dog"],
+["CA","cul","Quel animal bâtisseur de barrages est un symbole du Canada ?","Le castor","Le raton laveur","La loutre","L'ours"],
+["CA","geo","Par sa superficie, le Canada est le … plus grand pays du monde.","2e","1er","5e","10e"],
+["CA","geo","Avec quel pays le Canada partage-t-il la plus longue frontière ?","Les États-Unis","Le Mexique","Le Groenland","La Russie"],
+["CA","spo","Quelle ville canadienne a organisé les JO d'hiver de 2010 ?","Vancouver","Montréal","Calgary","Québec"],
+["CA","spo","Quel joueur de hockey canadien est surnommé « la Merveille » ?","Wayne Gretzky","Sidney Crosby","Mario Lemieux","Connor McDavid"],
+["CA","geo","Combien d'océans bordent le Canada ?","3","1","2","4"],
+["CA","geo","Dans quelle ville se trouve la célèbre tour CN ?","Toronto","Ottawa","Montréal","Winnipeg"],
+["CA","cul","Comment s'appelle le peuple autochtone du Grand Nord canadien ?","Les Inuits","Les Aztèques","Les Mayas","Les Vikings"],
+["CA","spo","Avec quels pays le Canada a-t-il organisé la Coupe du monde 2026 ?","Les États-Unis et le Mexique","La France et l'Espagne","Le Brésil et l'Argentine","Le Japon et la Corée"],
+["CA","spo","Quel sport a été inventé par le Canadien James Naismith ?","Le basket-ball","Le volley-ball","Le football américain","Le handball"],
+
+["IT","geo","Quelle est la capitale de l'Italie ?","Rome","Milan","Venise","Naples"],
+["IT","geo","À quoi ressemble la forme de l'Italie sur une carte ?","Une botte","Un hexagone","Un chapeau","Une étoile"],
+["IT","cul","Dans quelle ville se trouve la célèbre tour penchée ?","Pise","Florence","Turin","Rome"],
+["IT","geo","Quelle ville italienne est célèbre pour ses canaux et ses gondoles ?","Venise","Milan","Gênes","Bologne"],
+["IT","cul","Quel plat est né à Naples ?","La pizza","La paella","Les sushis","Le couscous"],
+["IT","geo","Quel volcan a détruit la ville de Pompéi ?","Le Vésuve","L'Etna","Le mont Fuji","Le Stromboli"],
+["IT","cul","Quel monument de Rome accueillait les combats de gladiateurs ?","Le Colisée","Le Panthéon","La fontaine de Trevi","Le Parthénon"],
+["IT","cul","Quel artiste italien a peint la Joconde ?","Léonard de Vinci","Michel-Ange","Picasso","Raphaël"],
+["IT","cul","Quelle est la monnaie de l'Italie ?","L'euro","La lire","Le franc","Le ducat"],
+["IT","spo","Combien de Coupes du monde de football l'Italie avait-elle gagnées avant 2026 ?","4","2","3","5"],
+["IT","spo","Quel est le surnom de l'équipe d'Italie de football ?","La Squadra Azzurra","La Roja","La Seleção","Les Bleus"],
+["IT","spo","De quelle couleur est le maillot de l'équipe d'Italie ?","Bleu","Rouge","Vert","Blanc"],
+["IT","spo","Comment s'appelle le grand tour cycliste d'Italie ?","Le Giro","La Vuelta","Le Tour de France","Le Tour des Flandres"],
+["IT","spo","Quelle écurie de Formule 1 italienne court en rouge ?","Ferrari","Mercedes","Red Bull","McLaren"],
+["IT","geo","Quel tout petit État indépendant se trouve dans la ville de Rome ?","Le Vatican","Monaco","Le Luxembourg","Andorre"],
+["IT","geo","Quelle grande île se trouve au sud de l'Italie ?","La Sicile","La Corse","La Crète","Majorque"],
+["IT","geo","Quelles montagnes forment le nord de l'Italie ?","Les Alpes","Les Pyrénées","L'Himalaya","Les Rocheuses"],
+["IT","cul","Quelles sont les couleurs du drapeau italien ?","Vert, blanc et rouge","Bleu, blanc et rouge","Rouge et jaune","Vert, jaune et bleu"],
+["IT","spo","Quelles villes ont organisé les JO d'hiver de 2026 ?","Milan et Cortina d'Ampezzo","Rome et Naples","Turin et Gênes","Venise et Vérone"],
+["IT","spo","Quel pays a gagné l'Euro 2020, joué en 2021 ?","L'Italie","L'Angleterre","Le Portugal","La France"]
+];
+
+const $=id=>document.getElementById(id);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fmt=n=>n.toLocaleString("fr-FR");
+
+let mode="ALL", list=[], i=0, pts=0, right=0, used50=false, jokerNow=false, streak=0, missed=[], results=[], cur=null, lock=false;
+
+// Choix du pays
+const opts=[["ALL","🌍","Les 6 pays"],...Object.entries(C).map(([k,v])=>[k,v.f,v.n])];
+$("chips").innerHTML=opts.map(([k,f,n])=>`<button class="chip" data-k="${k}" aria-pressed="${k===mode}"><span aria-hidden="true">${f}</span>${n}</button>`).join("");
+$("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;mode=b.dataset.k;
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.k===mode))});
+
+function build(){
+  if(mode!=="ALL") return shuffle(Q.filter(q=>q[0]===mode)).slice(0,20);
+  // Mélange équilibré : 3 ou 4 questions par pays
+  const per={};shuffle(Object.keys(C)).forEach((k,n)=>per[k]=n<2?4:3);
+  let out=[];for(const k in per) out=out.concat(shuffle(Q.filter(q=>q[0]===k)).slice(0,per[k]));
+  return shuffle(out);
+}
+function show(id){["start","game","end"].forEach(s=>$(s).hidden=s!==id);scrollTo(0,0)}
+// Joueur et classement local (ce téléphone)
+let player="";
+const KEY="wft-quiz-scores-v2";
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return []}};
+const save=a=>{try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){}};
+try{$("player").value=localStorage.getItem("wft-player")||""}catch(e){}
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function board(listEl,boxEl,meTs){
+  const s=load().sort((a,b)=>b.pts-a.pts||b.right-a.right).slice(0,10);
+  boxEl.hidden=!s.length;
+  listEl.innerHTML=s.map(r=>`<li class="${r.ts===meTs?"me":""}"><b>${esc(r.name)}<small>${r.right}/20 · ${r.mode}</small></b><span>${fmt(r.pts)}</span></li>`).join("");
+}
+board($("boardStartList"),$("boardStart"));
+// Classement en ligne partagé (fonction Netlify /api/scores)
+function drawWeb(s){
+  [["webStartList","webStart"],["webEndList","webEnd"]].forEach(([l,b])=>{
+    $(b).hidden=!s.length;
+    $(l).innerHTML=s.map(r=>`<li class="${player&&r.name.toLowerCase()===player.toLowerCase()?"me":""}"><b>${esc(r.name)}<small>${r.right}/20 · ${esc(r.mode)}</small></b><span>${fmt(r.pts)}</span></li>`).join("");
+  });
+}
+async function webBoard(post){
+  try{
+    const r=await fetch("/api/scores",post?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(post)}:{cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    drawWeb(await r.json());
+  }catch(e){ /* hors ligne ou ouvert sans Netlify : on garde le classement de la famille */ }
+}
+webBoard();
+function start(){
+  player=$("player").value.trim();
+  if(!player){$("player").classList.add("need");$("player").placeholder="Écrivez un prénom pour jouer";$("player").focus();return}
+  $("player").classList.remove("need");
+  try{localStorage.setItem("wft-player",player)}catch(e){}
+  list=build();i=0;pts=0;right=0;used50=false;streak=0;missed=[];results=[];$("j50").disabled=false;show("game");ask()}
+function ladder(){$("ladder").innerHTML=Array.from({length:N},(_,n)=>`<i class="${n<i?results[n]:n===i?"now":""}"></i>`).join("")}
+function ask(){
+  lock=false;const q=list[i];
+  cur={q,opts:shuffle(q.slice(3)),good:q[3]};
+  $("qn").textContent=i+1;$("pts").textContent=fmt(pts);
+  $("ctry").textContent=`${C[q[0]].f} ${C[q[0]].n}`;$("cat").textContent=CAT[q[1]];
+  jokerNow=false;
+  $("val").textContent=streak>=2?`🔥 Série de ${streak} · 100 pts + bonus`:"100 pts";$("q").textContent=q[2];
+  $("answers").innerHTML=cur.opts.map((o,n)=>`<button class="ans" data-a="${n}"><b>${"ABCD"[n]}</b><span>${o}</span></button>`).join("");
+  $("fb").textContent="";$("fb").className="feedback";$("next").hidden=true;
+  $("j50").disabled=used50;ladder();
+}
+$("answers").addEventListener("click",e=>{
+  const b=e.target.closest(".ans");if(!b||lock)return;lock=true;
+  const btns=[...document.querySelectorAll(".ans")];btns.forEach(x=>x.disabled=true);$("j50").disabled=true;
+  b.classList.add("picked");
+  const chosen=cur.opts[+b.dataset.a], ok=chosen===cur.good;
+  setTimeout(()=>{
+    b.classList.remove("picked");
+    btns.forEach(x=>{if(cur.opts[+x.dataset.a]===cur.good)x.classList.add("right")});
+    if(ok){streak++;const base=jokerNow?50:100,bonus=streak>=5?100:streak>=3?50:0,gain=base+bonus;pts+=gain;right++;results[i]="ok";$("fb").textContent=`Bonne réponse ! +${gain} points`+(bonus?` (dont +${bonus} de série 🔥 x${streak})`:"");$("fb").className="feedback ok"}
+    else{streak=0;b.classList.add("wrong");results[i]="ko";missed.push(cur);$("fb").textContent=`Raté ! La bonne réponse : ${cur.good}`;$("fb").className="feedback ko"}
+    $("pts").textContent=fmt(pts);
+    $("next").textContent=i===N-1?"Voir le résultat":"Question suivante";$("next").hidden=false;$("next").focus();
+  },reduce?0:800);
+});
+$("j50").addEventListener("click",()=>{
+  if(used50||lock)return;used50=true;jokerNow=true;$("val").textContent="Joker utilisé · 50 pts";$("j50").disabled=true;
+  const bad=shuffle([...document.querySelectorAll(".ans")].filter(x=>cur.opts[+x.dataset.a]!==cur.good)).slice(0,2);
+  bad.forEach(x=>{x.disabled=true;x.classList.add("gone")});
+});
+$("next").addEventListener("click",()=>{i++; if(i<N) ask(); else finish()});
+function finish(){
+  $("endPts").textContent=fmt(pts)+" pts";
+  $("endRight").textContent=`${right} bonne${right>1?"s":""} réponse${right>1?"s":""} sur 20`;
+  $("verdict").textContent=right>=18?"Champions du monde ! Vous êtes prêts pour demain 🏆":right>=14?"Très beau score, l'équipe est sur le podium !":right>=9?"Pas mal ! Encore une partie pour viser la finale.":"Échauffement terminé, on relance une partie ?";
+  $("missedBox").hidden=!missed.length;
+  $("missed").innerHTML=missed.map(m=>`<li>${m.q[2]}<br><strong>${m.good}</strong><span>${C[m.q[0]].f} ${C[m.q[0]].n} · ${CAT[m.q[1]]}</span></li>`).join("");
+  const modeName=mode==="ALL"?"6 pays":C[mode].n;
+  $("endName").textContent=player;
+  $("shareText").textContent=`🏆 Quiz World Futsal Tour\n${player} : ${right}/20 · ${fmt(pts)} points (${modeName})\nQui fait mieux ? 😎`;
+  $("copyMsg").textContent="";
+  const ts=Date.now();const all=load();
+  const mine=all.filter(r=>r.name.toLowerCase()===player.toLowerCase()).sort((a,b)=>a.ts-b.ts);
+  const last=mine[mine.length-1], best=mine.reduce((m,r)=>Math.max(m,r.right),0);
+  let prog="";
+  if(!mine.length) prog="Première partie : votre score de départ est posé. Rejouez pour le battre !";
+  else{
+    const d=right-last.right;
+    prog=d>0?`+${d} bonne${d>1?"s":""} réponse${d>1?"s":""} par rapport à la dernière partie 📈`:d<0?`${d} par rapport à la dernière partie (${last.right}/20). On retente ?`:`Même score que la dernière partie (${last.right}/20).`;
+    prog+=right>best?` Nouveau record personnel ! 🎉`:` Record personnel : ${best}/20.`;
+    prog+=` Partie n°${mine.length+1}.`;
+  }
+  $("progress").textContent=prog;
+  all.push({name:player,pts,right,mode:modeName,ts});save(all);
+  webBoard({name:player,pts,right,mode:modeName});
+  board($("boardEndList"),$("boardEnd"),ts);board($("boardStartList"),$("boardStart"));
+  show("end");
+}
+$("copy").addEventListener("click",()=>{
+  const t=$("shareText").textContent;
+  const fallback=()=>{const r=document.createRange();r.selectNodeContents($("shareText"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyMsg").textContent="Texte sélectionné : appuyez longuement puis « Copier »."};
+  try{navigator.clipboard.writeText(t).then(()=>{$("copyMsg").textContent="Copié ! Collez-le dans le groupe WhatsApp."},fallback)}catch(e){fallback()}
+});
+$("go").addEventListener("click",start);
+$("again").addEventListener("click",start);
+$("home").addEventListener("click",()=>show("start"));
+$("quit").addEventListener("click",()=>show("start"));
+</script>
+
+</body>
+</html>
